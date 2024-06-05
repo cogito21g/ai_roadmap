@@ -1,4 +1,4 @@
-### 13주차 강의 상세 계획: GNN 실습 프로젝트 3 - 모델 평가 및 최종 모델 선택
+### 14주차 강의 상세 계획: 양자 기계 학습 실습 프로젝트 3 - 모델 평가 및 최종 모델 선택
 
 #### 강의 목표
 - 모델의 성능 평가 방법과 최종 모델 선택 과정 이해
@@ -34,36 +34,24 @@ from sklearn.metrics import classification_report, roc_auc_score, roc_curve
 import matplotlib.pyplot as plt
 
 # 모델 평가 함수
-def evaluate_model(model, loader):
-    model.eval()
-    y_true = []
-    y_pred = []
-    y_pred_proba = []
-    for data in loader:
-        data = data.to(device)
-        out = model(data)
-        _, pred = out.max(dim=1)
-        y_true.extend(data.y.cpu().numpy())
-        y_pred.extend(pred.cpu().numpy())
-        y_pred_proba.extend(out.softmax(dim=1).cpu().numpy()[:, 1])
-    return y_true, y_pred, y_pred_proba
+def evaluate_model(model, X_test, y_test):
+    y_pred = model.predict(X_test)
+    y_pred_proba = model.decision_function(X_test)
+    print("Classification Report:")
+    print(classification_report(y_test, y_pred))
+
+    # ROC Curve 및 AUC
+    fpr, tpr, _ = roc_curve(y_test, y_pred_proba)
+    auc = roc_auc_score(y_test, y_pred_proba)
+    plt.plot(fpr, tpr, label=f'AUC = {auc:.4f}')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curve')
+    plt.legend(loc='best')
+    plt.show()
 
 # 모델 평가 실행
-y_true, y_pred, y_pred_proba = evaluate_model(model, test_loader)
-
-# 평가 지표 출력
-print("Classification Report:")
-print(classification_report(y_true, y_pred))
-
-# ROC Curve 및 AUC
-fpr, tpr, _ = roc_curve(y_true, y_pred_proba)
-auc = roc_auc_score(y_true, y_pred_proba)
-plt.plot(fpr, tpr, label=f'AUC = {auc:.4f}')
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
-plt.title('ROC Curve')
-plt.legend(loc='best')
-plt.show()
+evaluate_model(best_qsvm, X_test, y_test)
 ```
 
 ---
@@ -80,13 +68,11 @@ plt.show()
 #### 2.2 최종 모델 선택 및 분석 코드 (Python)
 ```python
 # 최종 모델 선택
-if auc > 0.8:  # 예시 기준
-    final_model = model
-    final_model_name = "GCN"
+best_model = best_qsvm
 
 # 최종 모델 분석
-print(f"최종 선택된 모델: {final_model_name}")
-print(final_model)
+print(f"최종 선택된 모델: QSVM with best parameters")
+print(best_model)
 ```
 
 ### 준비 자료
@@ -98,7 +84,9 @@ print(final_model)
 - **최종 모델 선택 및 분석**: 최종 모델을 선택하고, 선택 이유를 요약.
 - **과제 제출**: 다음 주차 강의 전까지 이메일로 제출.
 
-이 강의 계획안을 통해 학생들이 모델 평가 지표의 중요성을 이해하고, 다양한 평가 지표를 사용해 모델 성능을 평가하며, 최적의 모델을 선택하는 경험을 쌓을 수 있도록 유도합니다.
+이 강의 계획안을 통해 학생들이 모델
+
+ 평가 지표의 중요성을 이해하고, 다양한 평가 지표를 사용해 모델 성능을 평가하며, 최적의 모델을 선택하는 경험을 쌓을 수 있도록 유도합니다.
 
 ---
 
